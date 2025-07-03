@@ -1,0 +1,160 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name for the release'
+        required: true
+        default: 'v1.0.0'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Setup Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+        
+    - name: Install Go dependencies
+      run: go mod download
+      
+    - name: Install go-bindata
+      run: go install github.com/shuLhan/go-bindata/cmd/go-bindata@latest
+      
+    - name: Install Node.js dependencies
+      run: npm ci
+      
+    - name: Install Grunt CLI globally
+      run: npm install -g grunt-cli
+      
+    - name: Install Bower globally and dependencies
+      run: |
+        npm install -g bower
+        bower install
+        
+    - name: Build static files with Grunt
+      run: grunt build
+      
+    - name: Generate Go bindata
+      run: go generate .
+      
+    - name: Verify dist directory exists
+      run: |
+        if [ ! -d "dist" ]; then
+          echo "Error: dist directory not found after build"
+          exit 1
+        fi
+        echo "Contents of dist directory:"
+        ls -la dist/
+        
+    - name: Create dist archive
+      run: |
+        cd dist
+        zip -r ../transfer-sh-web-dist.zip .
+        cd ..
+        echo "Archive created with size: $(du -h transfer-sh-web-dist.zip | cut -f1)"
+        
+    - name: Create bindata archive
+      run: |
+        zip -r transfer-sh-web-bindata.zip bindata_gen.go go.mod go.sum
+        echo "Bindata archive created with size: $(du -h transfer-sh-web-bindata.zip | cut -f1)"
+        
+    - name: Get tag name
+      id: get_tag
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "tag_name=${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
+        else
+          echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.get_tag.outputs.tag_name }}
+        release_name: Release ${{ steps.get_tag.outputs.tag_name }}
+        body: |
+          ## Transfer.sh Web Frontend Release ${{ steps.get_tag.outputs.tag_name }}
+          
+          This release contains the built static web files and Go bindata for the transfer.sh frontend.
+          
+          ### What's included:
+          
+          **transfer-sh-web-dist.zip:**
+          - Compiled and minified CSS/JavaScript files
+          - Optimized images and fonts
+          - Processed HTML templates
+          - All static assets ready for web deployment
+          
+          **transfer-sh-web-bindata.zip:**
+          - Generated Go bindata file (`bindata_gen.go`)
+          - Go module files for embedding assets in Go applications
+          
+          ### Build Process:
+          This release was built using the complete process:
+          1. `npm install` - Install Node.js dependencies
+          2. `bower install` - Install Bower dependencies  
+          3. `grunt build` - Build and optimize static files
+          4. `go generate .` - Generate Go bindata from dist files
+          
+          ### Usage:
+          
+          **For web deployment:**
+          1. Download `transfer-sh-web-dist.zip`
+          2. Extract to your web server directory
+          3. Configure your transfer.sh backend with `--web-path /path/to/dist/`
+          
+          **For Go embedding:**
+          1. Download `transfer-sh-web-bindata.zip`
+          2. Use the generated `bindata_gen.go` in your Go application
+          
+          Built from commit: ${{ github.sha }}
+        draft: false
+        prerelease: false
+        
+    - name: Upload Dist Archive
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./transfer-sh-web-dist.zip
+        asset_name: transfer-sh-web-dist.zip
+        asset_content_type: application/zip
+        
+    - name: Upload Bindata Archive
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./transfer-sh-web-bindata.zip
+        asset_name: transfer-sh-web-bindata.zip
+        asset_content_type: application/zip
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: |
+          dist/
+          bindata_gen.go
+        retention-days: 30
