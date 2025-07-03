@@ -48,7 +48,7 @@ jobs:
         bower install
         
     - name: Build static files with Grunt
-      run: grunt build
+      run: grunt build --force
       
     - name: Generate Go bindata
       run: go generate .
