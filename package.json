@@ -22,7 +22,7 @@
     "grunt-contrib-less": "^3.0.0",
     "grunt-contrib-uglify": "^5.2.2",
     "grunt-contrib-watch": "^1.1.0",
-    "grunt-google-fonts": "^2.0.2",
+    "grunt-google-fonts": "*",
     "grunt-includes": "^1.0.0",
     "grunt-npm-command": "^0.1.2",
     "grunt-rev": "^0.1.0",
