@@ -1,33 +1,52 @@
-// Colors
+// Colors - Modern Dark Theme
+@blue: #0ea5e9;
+@dark-blue: #0f172a;
+@red: #ef4444;
+@light-gray: #1e293b;
+@dark-gray: #64748b;
+@accent-blue: #3b82f6;
+@success-green: #10b981;
+@warning-orange: #f59e0b;
 
-@blue: #85b5bb;
-@dark-blue: #36535a;
-@red: #e96e57;
-@light-gray: #f6f8f8;
-@dark-gray: #3b3b3b;
+// Background colors
+@bg-primary: #020617;
+@bg-secondary: #0f172a;
+@bg-tertiary: #1e293b;
+@bg-card: #334155;
 
-@navbar-default-bg:    #fff;
+// Text colors
+@text-primary: #f8fafc;
+@text-secondary: #cbd5e1;
+@text-muted: #64748b;
 
+@navbar-default-bg: @bg-secondary;
 
-@text-color: @dark-gray;
-@link-color: @dark-gray;
+@text-color: @text-primary;
+@link-color: @accent-blue;
 
-
-@progress-bg:    @blue;
+@progress-bg: @blue;
 
 // Typography
-@font-family-base: "Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
-@font-family-mono: "Droid Sans Mono", monospace;
+@font-family-base: "Inter", "Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+@font-family-mono: "JetBrains Mono", "Fira Code", "Droid Sans Mono", monospace;
 
-@headings-font-family:    @font-family-base;
-@headings-font-weight:    100;
-@headings-line-height:    1.1;
-@headings-color:          inherit;
-
+@headings-font-family: @font-family-base;
+@headings-font-weight: 600;
+@headings-line-height: 1.2;
+@headings-color: @text-primary;
 
 // Animation
 @animation-duration: 0.3s;
 
-
 // Layout
-@grid-gutter-width:         70px;
+@grid-gutter-width: 70px;
+
+// Shadows and effects
+@shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+@shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+@shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+@shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+// Gradients
+@gradient-primary: linear-gradient(135deg, @blue 0%, @accent-blue 100%);
+@gradient-secondary: linear-gradient(135deg, @bg-secondary 0%, @bg-tertiary 100%);
